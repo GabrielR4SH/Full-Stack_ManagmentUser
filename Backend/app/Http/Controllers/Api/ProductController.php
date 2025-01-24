@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Http\Resources\ProductResource;
 
 class ProductController extends Controller
 {
@@ -14,7 +15,15 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        $products = Product::get();
+        
+        if($products->count() > 0){
+            
+            return ProductResource::collection($products);
+        
+        } else{
+            return response()->json(['message' => 'No message available'], 200);
+        }
     }
 
     /**
@@ -30,7 +39,14 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        //
+        // Os dados validados são automaticamente passados para o método
+        $validatedData = $request->validated();
+
+        // Crie o produto com os dados validados
+        $product = Product::create($validatedData);
+
+        // Retorne uma resposta adequada, por exemplo, redirecionando ou retornando o produto criado
+        return response()->json($product, 201);
     }
 
     /**
