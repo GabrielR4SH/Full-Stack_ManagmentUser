@@ -7,22 +7,25 @@ use Illuminate\Foundation\Http\FormRequest;
 class UpdateProductRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Determine se o usuário está autorizado a fazer esta solicitação.
      */
     public function authorize(): bool
     {
-        return false;
+        // Retorne true para autorizar a requisição
+        return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Regras de validação para atualização do produto.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            //
+            'name' => 'required|string|max:255',
+            'price' => 'required|integer',
+            'description' => 'required',
         ];
     }
 }

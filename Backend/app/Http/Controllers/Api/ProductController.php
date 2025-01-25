@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use App\Http\Resources\ProductResource;
 
 class ProductController extends Controller
@@ -13,71 +15,42 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    // Lista todos os produtos
+    public function index(): JsonResponse
     {
-        $products = Product::get();
-        
-        if($products->count() > 0){
-            
-            return ProductResource::collection($products);
-        
-        } else{
-            return response()->json(['message' => 'No message available'], 200);
-        }
+        $products = Product::all();
+        return response()->json($products);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    // Retorna um único produto
+    public function show(Product $product): JsonResponse
     {
-        //
+        return response()->json($product);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreProductRequest $request)
+    // Armazena um novo produto
+    public function store(StoreProductRequest $request): JsonResponse
     {
-        // Os dados validados são automaticamente passados para o método
         $validatedData = $request->validated();
-
-        // Crie o produto com os dados validados
         $product = Product::create($validatedData);
 
-        // Retorne uma resposta adequada, por exemplo, redirecionando ou retornando o produto criado
-        return response()->json($product, 201);
+        return response()->json($product, Response::HTTP_CREATED);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Product $prodcut)
+    // Atualiza um produto existente
+    public function update(UpdateProductRequest $request, Product $product): JsonResponse
     {
-        //
+        $validatedData = $request->validated();
+        $product->update($validatedData);
+
+        return response()->json($product);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Product $prodcut)
+    // Exclui um produto
+    public function destroy(Product $product): JsonResponse
     {
-        //
-    }
+        $product->delete();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateProductRequest $request, Product $prodcut)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Product $prodcut)
-    {
-        //
+        return response()->json(['message' => 'Product deleted successfully'], Response::HTTP_NO_CONTENT);
     }
 }
