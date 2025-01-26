@@ -12,47 +12,70 @@ class PurchaseController extends Controller
     /**
      * Exibe todas as compras do usuário autenticado.
      */
-
-     //TODO
     public function index()
     {
-        return auth()->user()->purchases()->with('product')->get();
+        // Recupera o usuário autenticado
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['error' => 'Usuário não autenticado'], 401);
+        }
+
+        return $user->purchases()->with('product')->get();
     }
 
     /**
      * Cria uma nova compra.
      */
-    public function store(StorePurchaseRequest $request)
+    public function store(Request $request)
     {
         $user = auth()->user();
-        $product = Product::findOrFail($request->product_id);
 
-        // Verifica se o produto tem estoque suficiente
-        if ($product->quantity < $request->quantity) {
-            return response()->json(['error' => 'Produto sem estoque suficiente'], 400);
+        if (!$user) {
+            return response()->json(['error' => 'Usuário não autenticado'], 401);
         }
 
-        // Verifica se o usuário tem saldo suficiente
-        $totalPrice = $product->price * $request->quantity;
-        if ($user->balance < $totalPrice) {
-            return response()->json(['error' => 'Saldo insuficiente'], 400);
-        }
-
-        // Deduzir saldo do usuário e quantidade do produto
-        $user->balance -= $totalPrice;
-        $user->save();
-
-        $product->quantity -= $request->quantity;
-        $product->save();
-
-        // Cria a compra
-        $purchase = Purchase::create([
-            'user_id' => $user->id,
-            'product_id' => $product->id,
-            'quantity' => $request->quantity,
-            'total_price' => $totalPrice,
-        ]);
+        $purchase = new Purchase($request->all());
+        $purchase->user_id = $user->id; // Relaciona a compra ao usuário autenticado
+        $purchase->save();
 
         return response()->json($purchase, 201);
+    }
+
+    /**
+     * Exibe os detalhes de uma compra específica.
+     */
+    public function show(Purchase $purchase)
+    {
+        if (auth()->id() !== $purchase->user_id) {
+            return response()->json(['error' => 'Você não tem permissão para visualizar esta compra'], 403);
+        }
+
+        return response()->json($purchase);
+    }
+
+    /**
+     * Atualiza uma compra existente.
+     */
+    public function update(Request $request, Purchase $purchase)
+    {
+        if (auth()->id() !== $purchase->user_id) {
+            return response()->json(['error' => 'Você não tem permissão para atualizar esta compra'], 403);
+        }
+
+        $purchase->update($request->all());
+        return response()->json($purchase);
+    }
+
+    /**
+     * Remove uma compra.
+     */
+    public function destroy(Purchase $purchase)
+    {
+        if (auth()->id() !== $purchase->user_id) {
+            return response()->json(['error' => 'Você não tem permissão para excluir esta compra'], 403);
+        }
+
+        $purchase->delete();
+        return response()->json(['message' => 'Compra excluída com sucesso']);
     }
 }
