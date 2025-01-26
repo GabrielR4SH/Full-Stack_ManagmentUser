@@ -19,6 +19,7 @@ Route::middleware('auth:sanctum')->group(function () {
 //Comprar Disponiveis
 Route::get('products/available', [ProductController::class, 'availableProducts']);
 
+//TODO:
 // Autenticação Sanctum
 Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login']);
 Route::post('/register', [\App\Http\Controllers\AuthController::class, 'register']);

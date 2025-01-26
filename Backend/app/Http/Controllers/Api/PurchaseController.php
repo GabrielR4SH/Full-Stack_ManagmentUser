@@ -12,6 +12,8 @@ class PurchaseController extends Controller
     /**
      * Exibe todas as compras do usuário autenticado.
      */
+
+     //TODO
     public function index()
     {
         return auth()->user()->purchases()->with('product')->get();
