@@ -53,4 +53,10 @@ class ProductController extends Controller
 
         return response()->json(['message' => 'Product deleted successfully'], Response::HTTP_NO_CONTENT);
     }
+
+    //
+    public function availableProducts()
+    {
+        return Product::where('quantity', '>', 0)->get();
+    }
 }
